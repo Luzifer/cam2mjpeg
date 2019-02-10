@@ -1,0 +1,11 @@
+---
+
+image: "reporunner/golang-alpine"
+checkout_dir: /go/src/github.com/Luzifer/cam2mjpeg
+
+commands:
+  - make publish
+
+environment:
+  CGO_ENABLED: 0
+  GO111MODULE: no
