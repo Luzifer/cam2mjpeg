@@ -1,11 +1,13 @@
 package main
 
 import (
+	"encoding/base64"
 	"fmt"
 	"mime/multipart"
 	"net/http"
 	"net/textproto"
 
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -34,18 +36,26 @@ func handleMJPEG(res http.ResponseWriter, r *http.Request, imgs chan []byte, uid
 			return
 
 		case img := <-imgs:
-			partHeader := make(textproto.MIMEHeader)
-			partHeader.Add("Content-Type", "image/jpeg")
+			err := func() error {
+				partHeader := make(textproto.MIMEHeader)
+				partHeader.Add("Content-Type", "image/jpeg")
+				partHeader.Add("Content-Transfer-Encoding", "base64")
 
-			partWriter, err := mimeWriter.CreatePart(partHeader)
-			if err != nil {
-				logger.WithError(err).Error("Unable to create mime part")
-				continue
-			}
+				partWriter, err := mimeWriter.CreatePart(partHeader)
+				if err != nil {
+					return errors.Wrap(err, "Unable to create mime part")
+				}
 
-			_, err = partWriter.Write(img)
+				b64w := base64.NewEncoder(base64.StdEncoding, partWriter)
+				defer b64w.Close()
+
+				_, err = b64w.Write(img)
+
+				return errors.Wrap(err, "Unable to write image")
+			}()
+
 			if err != nil {
-				logger.WithError(err).Error("Unable to write image")
+				logger.WithError(err).Error("Unable to process image")
 				errC++
 
 				if errC > 5 {
