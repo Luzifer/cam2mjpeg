@@ -1,3 +1,7 @@
+# 0.3.1 / 2019-04-29
+
+  * Fix: Add required dependencies
+
 # 0.3.0 / 2019-04-29
 
   * Add base64 encoding of image
