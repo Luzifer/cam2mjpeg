@@ -1,3 +1,9 @@
+# 0.4.0 / 2019-04-29
+
+  * Replace mjpeg reader to fix broken frames
+  * Hide ffmpeg logs by default
+  * Revert: Add base64 encoding of image
+
 # 0.3.1 / 2019-04-29
 
   * Fix: Add required dependencies
