@@ -10,9 +10,10 @@ import (
 	"strconv"
 	"sync"
 
-	rconfig "github.com/Luzifer/rconfig/v2"
 	"github.com/gofrs/uuid"
 	log "github.com/sirupsen/logrus"
+
+	rconfig "github.com/Luzifer/rconfig/v2"
 )
 
 var (
@@ -46,7 +47,7 @@ func init() {
 	}
 
 	if cfg.VersionAndExit {
-		fmt.Printf("imgdecode %s\n", version)
+		fmt.Printf("cam2mjpeg %s\n", version)
 		os.Exit(0)
 	}
 
@@ -59,6 +60,7 @@ func init() {
 
 func main() {
 	http.HandleFunc("/mjpeg", handle)
+	http.HandleFunc("/snapshot.jpg", handleSnapshot)
 	go func() {
 		log.WithError(http.ListenAndServe(cfg.Listen, nil)).Fatal("HTTP server has gone")
 	}()
@@ -144,6 +146,26 @@ func handle(res http.ResponseWriter, r *http.Request) {
 	registerImgChan(uid, imgChan)
 
 	handleMJPEG(res, r, imgChan, uid)
+}
+
+func handleSnapshot(w http.ResponseWriter, r *http.Request) {
+	imgChan := make(chan []byte, 10)
+	uid := uuid.Must(uuid.NewV4()).String()
+
+	defer func() {
+		deregisterImgChan(uid)
+		close(imgChan)
+	}()
+
+	registerImgChan(uid, imgChan)
+
+	img := <-imgChan
+
+	w.Header().Add("Cache-Control", "no-store, no-cache")
+	w.Header().Add("Connection", "close")
+	w.Header().Set("Content-Type", "image/jpeg")
+
+	w.Write(img)
 }
 
 func registerImgChan(id string, ic chan []byte) {
