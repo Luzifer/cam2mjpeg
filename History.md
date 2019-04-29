@@ -1,3 +1,7 @@
+# 0.2.0 / 2019-04-29
+
+  * Add handler for single jpeg image
+
 # 0.1.0 / 2019-02-10
 
   * Initial version
