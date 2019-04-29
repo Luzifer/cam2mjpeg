@@ -4,6 +4,8 @@ github.com/Luzifer/rconfig/v2
 github.com/gofrs/uuid
 # github.com/konsorten/go-windows-terminal-sequences v1.0.1
 github.com/konsorten/go-windows-terminal-sequences
+# github.com/pkg/errors v0.8.1
+github.com/pkg/errors
 # github.com/sirupsen/logrus v1.3.0
 github.com/sirupsen/logrus
 # github.com/spf13/pflag v1.0.3
