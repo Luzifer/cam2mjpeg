@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"io"
 	"net/http"
 	"os"
 	"os/exec"
@@ -96,27 +95,46 @@ func main() {
 
 	log.Debug("ffmpeg spawned")
 
-	buf := new(bytes.Buffer)
+	var (
+		br, bw int
+		buf    = make([]byte, 10*1024*1024) // 10MB (jpg should be smaller)
+	)
 
 	for {
-		if _, err := io.CopyN(buf, out, 1024); err != nil {
-			log.WithError(err).Error("Failed to read ffmpeg output")
-			break
+		// If buffer was read, slide the remains to the beginning
+		if br > 0 {
+			copy(buf, buf[br:bw])
+			bw -= br
+			br = 0
 		}
 
-		eoj := bytes.Index(buf.Bytes(), endOfJPEG)
-		if eoj == -1 {
+		// Fill buffer
+		n, err := out.Read(buf[bw:])
+		if err != nil {
+			log.WithError(err).Fatal("Unable to read from output")
+		}
+		bw += n
+
+		if n == 0 {
+			// Nothing read, try again
 			continue
 		}
 
-		img := buf.Next(eoj + len(endOfJPEG))
+		// Extract as many images as possible before next read
+		for eoj := bytes.Index(buf[br:bw], endOfJPEG); eoj >= 0; eoj = bytes.Index(buf[br:bw], endOfJPEG) {
+			eoj += len(endOfJPEG)
+			img := make([]byte, eoj-br)
+			copy(img, buf[br:br+eoj])
 
-		if !bytes.HasPrefix(img, beginOfJPEG) || !bytes.HasSuffix(img, endOfJPEG) {
-			log.Warn("Found invalid JPEG, skipping")
-			continue
+			br += eoj
+
+			if !bytes.HasPrefix(img, beginOfJPEG) || !bytes.HasSuffix(img, endOfJPEG) {
+				log.Warn("Found invalid JPEG, skipping")
+				continue
+			}
+
+			go sendImage(img)
 		}
-
-		go sendImage(img)
 	}
 }
 

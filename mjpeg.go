@@ -5,6 +5,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"net/textproto"
+	"strconv"
 
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -38,6 +39,7 @@ func handleMJPEG(res http.ResponseWriter, r *http.Request, imgs chan []byte, uid
 			err := func() error {
 				partHeader := make(textproto.MIMEHeader)
 				partHeader.Add("Content-Type", "image/jpeg")
+				partHeader.Add("Content-Length", strconv.Itoa(len(img)))
 
 				partWriter, err := mimeWriter.CreatePart(partHeader)
 				if err != nil {
