@@ -19,6 +19,7 @@ import (
 var (
 	cfg = struct {
 		Device         string `flag:"input,i" default:"/dev/video0" description:"Video device to read from"`
+		FFMpegLog      bool   `flag:"ffmpeg-log" default:"false" description:"Send ffmpeg logs to stderr"`
 		FrameRate      int    `flag:"rate,r" default:"10" description:"Frame rate to show in MJPEG"`
 		Height         int    `flag:"height,h" default:"720" description:"Height of video frames"`
 		Listen         string `flag:"listen" default:":3000" description:"Port/IP to listen on"`
@@ -79,7 +80,9 @@ func main() {
 		"-f", "image2pipe",
 		"-")
 
-	cmd.Stderr = os.Stderr
+	if cfg.FFMpegLog {
+		cmd.Stderr = os.Stderr
+	}
 
 	out, err := cmd.StdoutPipe()
 	if err != nil {
