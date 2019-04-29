@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/base64"
 	"fmt"
 	"mime/multipart"
 	"net/http"
@@ -39,18 +38,13 @@ func handleMJPEG(res http.ResponseWriter, r *http.Request, imgs chan []byte, uid
 			err := func() error {
 				partHeader := make(textproto.MIMEHeader)
 				partHeader.Add("Content-Type", "image/jpeg")
-				partHeader.Add("Content-Transfer-Encoding", "base64")
 
 				partWriter, err := mimeWriter.CreatePart(partHeader)
 				if err != nil {
 					return errors.Wrap(err, "Unable to create mime part")
 				}
 
-				b64w := base64.NewEncoder(base64.StdEncoding, partWriter)
-				defer b64w.Close()
-
-				_, err = b64w.Write(img)
-
+				_, err = partWriter.Write(img)
 				return errors.Wrap(err, "Unable to write image")
 			}()
 
