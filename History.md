@@ -1,3 +1,7 @@
+# 0.3.0 / 2019-04-29
+
+  * Add base64 encoding of image
+
 # 0.2.0 / 2019-04-29
 
   * Add handler for single jpeg image
