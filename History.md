@@ -1,3 +1,8 @@
+# 0.5.0 / 2020-01-05
+
+  * Update dependencies
+  * Add nobuffer flag
+
 # 0.4.0 / 2019-04-29
 
   * Replace mjpeg reader to fix broken frames
