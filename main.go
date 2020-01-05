@@ -73,6 +73,7 @@ func main() {
 		"-s", fmt.Sprintf("%dx%d", cfg.Width, cfg.Height),
 		"-r", strconv.Itoa(cfg.FrameRate),
 		"-i", cfg.Device,
+		"-fflags", "nobuffer",
 		"-c:v", "mjpeg",
 		"-q:v", strconv.Itoa(cfg.Quality),
 		"-boundary_tag", "ffmpeg",
